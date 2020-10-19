@@ -1,0 +1,96 @@
+set interfaces loopback 'lo'
+set service ssh port '22'
+set system config-management commit-revisions '20'
+set system console device ttyS0 speed '9600'
+set system host-name 'firewall'
+set system ntp server '0.pool.ntp.org'
+set system ntp server '1.pool.ntp.org'
+set system ntp server '2.pool.ntp.org'
+set system package repository community components 'main'
+set system package repository community distribution 'helium'
+set system package repository community url 'http://packages.vyos.net/vyos'
+set system syslog global facility all level 'notice'
+set system syslog global facility protocols level 'debug'
+
+set firewall all-ping enable
+set firewall syn-cookies enable
+set firewall group network-group INTERNAL_VLANS_WITH_INTERNET description "Internal VLANs with NAT"
+
+set service dns forwarding name-server 8.8.8.8
+set service dns forwarding name-server 4.4.4.4
+
+{% for vlan in vlans | selectattr('dns-forward', 'equalto', true) | list%}
+set service dns forwarding listen-on {{ethernet_vlan_mapping[vlan.vid|string]}}
+{% endfor %}
+
+{% for vlan in vlans | selectattr('nat', 'equalto', true) | list%}
+set firewall group network-group INTERNAL_VLANS_WITH_INTERNET network {{vlan.network}}
+{% endfor %}
+
+{% for vlan in vlans | selectattr('nat', 'equalto', true) | list %}
+set nat source rule {{loop.index}} outbound-interface {{ethernet_vlan_mapping['1000']}}
+set nat source rule {{loop.index}} translation address 'masquerade'
+set nat source rule {{loop.index}} source address {{vlan.network}}
+{% endfor %}
+
+{% for vlan in vlans %}
+set interfaces ethernet {{ethernet_vlan_mapping[vlan.vid|string]}} address {{vrrp[vlan.vid].local}}
+set interfaces ethernet {{ethernet_vlan_mapping[vlan.vid|string]}} description '{{vlan.description}}'
+set interfaces ethernet {{ethernet_vlan_mapping[vlan.vid|string]}} vrrp vrrp-group {{vrrp[vlan.vid].group}} preempt 'true'
+set interfaces ethernet {{ethernet_vlan_mapping[vlan.vid|string]}} vrrp vrrp-group {{vrrp[vlan.vid].group}} priority {{vrrp[vlan.vid].priority}}
+set interfaces ethernet {{ethernet_vlan_mapping[vlan.vid|string]}} vrrp vrrp-group {{vrrp[vlan.vid].group}} virtual-address {{vrrp[vlan.vid].vip}}
+{% endfor %}
+
+{% for vlan in vlans | selectattr('firewall', 'equalto', true) | list%}
+
+set firewall name {{vlan.vid}}_RS default-action 'accept'
+set firewall name {{vlan.vid}}_RS description 'RULES FOR VLAN {{vlan.vid}}'
+
+{% for other_vlan in vlans | selectattr('firewall', 'equalto', true) | list %}
+{% if vlan.vid != other_vlan.vid %}
+set firewall name {{vlan.vid}}_RS rule {{loop.index}} action 'drop'
+set firewall name {{vlan.vid}}_RS rule {{loop.index}} destination address '{{other_vlan.network}}'
+set firewall name {{vlan.vid}}_RS rule {{loop.index}} protocol 'all'
+set firewall name {{vlan.vid}}_RS rule {{loop.index}} source address '{{vlan.network}}'
+{% endif %}
+{% endfor %}
+
+set interfaces ethernet {{ethernet_vlan_mapping[vlan.vid|string]}} firewall local name {{vlan.vid}}_RS
+
+{% endfor %}
+
+{% include './templates/dhcp.cfg.j2' %}
+{% include './templates/openvpn.cfg.j2' %}
+
+set firewall name OUTSIDE_IN_RS default-action 'drop'
+set firewall name OUTSIDE_IN_RS rule 10 action 'accept'
+set firewall name OUTSIDE_IN_RS rule 10 state established 'enable'
+set firewall name OUTSIDE_IN_RS rule 10 state related 'enable'
+set firewall name OUTSIDE_IN_RS rule 20 action 'accept'
+set firewall name OUTSIDE_IN_RS rule 20 destination address '213.146.141.0/25'
+set firewall name OUTSIDE_IN_RS rule 20 protocol 'all'
+set firewall name OUTSIDE_IN_RS rule 20 source address '0.0.0.0/0'
+set firewall name OUTSIDE_LOCAL_RS default-action 'drop'
+set firewall name OUTSIDE_LOCAL_RS rule 10 action 'accept'
+set firewall name OUTSIDE_LOCAL_RS rule 10 state established 'enable'
+set firewall name OUTSIDE_LOCAL_RS rule 20 action 'accept'
+set firewall name OUTSIDE_LOCAL_RS rule 20 icmp type-name 'echo-request'
+set firewall name OUTSIDE_LOCAL_RS rule 20 protocol 'icmp'
+set firewall name OUTSIDE_LOCAL_RS rule 20 state new 'enable'
+set firewall name OUTSIDE_LOCAL_RS rule 30 action 'drop'
+set firewall name OUTSIDE_LOCAL_RS rule 30 destination port '22'
+set firewall name OUTSIDE_LOCAL_RS rule 30 protocol 'tcp'
+set firewall name OUTSIDE_LOCAL_RS rule 30 recent count '4'
+set firewall name OUTSIDE_LOCAL_RS rule 30 recent time '60'
+set firewall name OUTSIDE_LOCAL_RS rule 30 state new 'enable'
+
+{% for vpn in vpns %}
+set firewall name OUTSIDE_LOCAL_RS rule 4{{vpn.tun}} action 'accept'
+set firewall name OUTSIDE_LOCAL_RS rule 4{{vpn.tun}} destination port '{{vpn.port}}'
+set firewall name OUTSIDE_LOCAL_RS rule 4{{vpn.tun}} protocol 'udp'
+{% endfor %}
+
+set interfaces ethernet {{ethernet_vlan_mapping['1000']}} firewall in name 'OUTSIDE_IN_RS'
+set interfaces ethernet {{ethernet_vlan_mapping['1000']}} firewall local name 'OUTSIDE_LOCAL_RS'
+
+set protocols static route 0.0.0.0/0 next-hop 213.146.143.33

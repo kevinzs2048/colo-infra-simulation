@@ -1,0 +1,100 @@
+- name: Install dependencies
+  apt:
+    state: present
+    name: "{{item}}"
+    update_cache: true
+  with_items:
+    - "{{packages}}"
+
+- name: Load required kernel modules
+  modprobe:
+    name: "{{item}}"
+    state: present
+  with_items:
+    - "{{modules}}"
+
+- name: Save kernel modules in /etc/modules
+  lineinfile:
+    path: /etc/modules
+    line: "{{item}}"
+  with_items:
+    - "{{modules}}"
+
+- name: Create all required VLAN interfaces
+  ignore_errors: yes
+  shell: "vconfig add {{item.trunk}}-trunk {{item.vid}}"
+  with_items:
+    - "{{vlans}}"
+
+- name: Enable rc.local
+  systemd:
+    name: rc.local
+    state: started
+    enabled: True
+
+- name: Add VLANs vconfig to rc.local
+  lineinfile:
+    dest: /etc/rc.local
+    insertbefore: "exit 0"
+    line: "vconfig add lan-trunk {{item.vid}} || true"
+  with_items:
+    - "{{vlans}}"
+
+- name: Add udev rules reload to rc.local
+  lineinfile:
+    dest: /etc/rc.local
+    insertbefore: "exit 0"
+    line: "ifconfig {{item['old']}} down && udevadm control --reload-rules; udevadm trigger --action=add; udevadm trigger --action=change; udevadm trigger; ifup {{item['new']}}; ifconfig {{item['new']}} up || true"
+  with_items:
+    - "{{ethernet_to_rename.values()}}"
+
+- name: Get libvirt networks facts
+  virt_net:
+    command: facts
+
+- name: Undefine the default network if exists
+  virt_net:
+    command: undefine
+    name: default
+  when: "{{'default' in ansible_libvirt_networks}}"
+
+- name: Destroy the default network if exists
+  virt_net:
+    command: destroy
+    name: default
+  when: "{{'default' in ansible_libvirt_networks}}"
+
+- name: Define the libvirt networks for vlans
+  ignore_errors: yes
+  virt_net:
+    command: define
+    name: "br-vlan{{item.vid}}"
+    xml: '{{lookup("template", "libvirt-br-vlan.xml.j2")}}'
+  with_items:
+    - "{{vlans}}"
+
+- name: Start the libvirt networks for vlans
+  ignore_errors: yes
+  virt_net:
+    command: start
+    name: "br-vlan{{item.vid}}"
+  with_items:
+    - "{{vlans}}"
+
+- name: Check the libvirt networks for vlans
+  ignore_errors: yes
+  virt_net:
+    state: active
+    name: "br-vlan{{item.vid}}"
+  with_items:
+    - "{{vlans}}"
+
+- name: Autostart libvirt networks for vlans
+  ignore_errors: yes
+  virt_net:
+    autostart: yes
+    name: "br-vlan{{item.vid}}"
+  with_items:
+    - "{{vlans}}"
+
+#- import_tasks: vyos.yml

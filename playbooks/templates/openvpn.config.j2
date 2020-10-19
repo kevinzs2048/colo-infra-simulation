@@ -1,0 +1,21 @@
+client
+proto udp
+remote-cert-tls server
+cipher AES-256-CBC
+auth SHA512
+verb 2
+dev tun0
+<cert>
+{{certs.results[item|int].stdout[0]}}
+</cert>
+<ca>
+{{ca.stdout[0]}}
+</ca>
+<key>
+{{keys.results[item|int].stdout[0]}}
+</key>
+{% for vpn in vpns %}
+{% if certs.results[item|int].item['vlan'] in vpn.domain %}
+remote 213.146.143.36 {{vpn.port}}
+{% endif %}
+{% endfor %}

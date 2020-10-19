@@ -1,0 +1,64 @@
+- name: Current mac addresses configured at the hypervisor
+  shell: cat firewall-macaddrs
+  register: domiflist
+
+- name: Current interfaces
+  vyos_command:
+    commands:
+      - "grep {{item.split(' ')[1]}} /sys/class/net/*/address"
+  with_items:
+    - "{{ domiflist.stdout_lines }}"
+  register: interfaces
+
+- name: Find the firewall interfaces that needs to be used for VLANs
+  set_fact:
+    ethernet_vlan_mapping: "{{ ethernet_vlan_mapping | combine({ item.item.split(' ')[0].split('vlan')[1] : item.stdout[0].split('/')[4]})}}"
+  with_items:
+    - "{{interfaces.results}}"
+  when:
+    - "{{item.stdout[0].split('/') | length >= 5}}"
+    
+- name: Copy 2cca file into the machine
+  vyos_command:
+    commands:
+      - "test -f /config/auth/2cca || curl https://raw.githubusercontent.com/nicolas314/2cca/master/2cca.py --output /config/auth/2cca"
+      - "chmod 0755 /config/auth/2cca"
+
+- name: Generate a root CA certificate for VPN
+  become: yes
+  vyos_command:
+    commands:
+      - "test -f /config/auth/dh1024.pem || openssl dhparam -outform PEM -out /config/auth/dh1024.pem 102"
+      - "test -f /config/auth/{{ca_domain}}.crt || python /config/auth/2cca root cn={{ca_domain}} && sudo cp {{ca_domain}}.* /config/auth/"
+      
+- name: Generate certificates for each VPN server
+  become: yes
+  vyos_command:
+     commands:
+       - "test -f /config/auth/{{item['domain']}}.crt || python /config/auth/2cca server cn={{item['domain']}} a={{ca_domain}} && sudo cp {{item['domain']}}.* /config/auth/"
+  with_items:
+    - "{{vpns}}"
+
+- name: Generate the CA CRL
+  become: yes
+  vyos_command:
+    commands:
+      - "test -f /config/auth/crl.conf || curl https://gist.githubusercontent.com/niedbalski/41eff01f6a786049badb3731f7fef3fc/raw/1638b2b2ea35caccae52c37ba2593db461364352/crl-ssl.conf --output /config/auth/crl.conf"
+      - "test -f /config/auth/{{ca_domain}}.crl.pem || openssl ca -gencrl -keyfile /config/auth/{{ca_domain}}.key -cert /config/auth/{{ca_domain}}.crt -out /config/auth/{{ca_domain}}.crl.pem -config /config/auth/crl.conf"
+
+- name: Generate a local configuration
+  template:
+    src: "templates/config.cfg.j2"
+    dest: "/tmp/config-{{inventory_hostname}}.cfg"
+  delegate_to: localhost
+
+# - name: Load the configuration on the device
+#   vyos_config:
+#     src: "templates/config.cfg.j2"
+#     backup: yes
+#     save: yes
+
+- name: Set the default static route
+  vyos_command:
+    commands:
+      - "ip route add default via {{default_gateway_ip}} dev {{ethernet_vlan_mapping['1000']|string}}"

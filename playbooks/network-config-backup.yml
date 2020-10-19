@@ -1,0 +1,20 @@
+- hosts: switches
+  connection: local
+  gather_facts: no
+  vars:
+    cli:
+      host: "{{ inventory_hostname }}"
+      port: "{{ ansible_ssh_port }}"
+      username: "{{ ansible_ssh_username }}"
+      password: "{{ ansible_ssh_pass }}"
+      #transport: cli
+  tasks:
+    - ce_config:
+        backup: yes
+
+- hosts: firewalls
+  connection: local
+  gather_facts: no
+  tasks:
+    - vyos_config:
+        backup: yes

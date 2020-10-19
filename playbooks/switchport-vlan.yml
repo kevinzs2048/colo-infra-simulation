@@ -1,0 +1,16 @@
+- hosts: switches
+  connection: local
+  gather_facts: no
+  vars:
+    cli:
+      host: "{{ inventory_hostname }}"
+      port: "22"
+      username: "{{ ansible_ssh_user }}"
+      password: "{{ ansible_ssh_pass }}"
+  tasks:
+    - name: Ensure {{ switchport }} on switch {{ inventory_hostname }} is configured for access vlan {{ vlan }}
+      ce_switchport:
+        interface: "{{ switchport }}"
+        mode: access
+        access_vlan: "{{ vlan }}"
+        provider: '{{ cli }}'

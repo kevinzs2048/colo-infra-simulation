@@ -1,0 +1,5 @@
+<network>
+  <name>br-vlan{{item.vid}}</name>
+  <forward mode="bridge"/>
+  <bridge name="br-vlan-{{item.vid}}"/>
+</network>

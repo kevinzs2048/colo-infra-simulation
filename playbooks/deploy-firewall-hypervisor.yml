@@ -1,0 +1,17 @@
+- hosts: firewall-hypervisors
+  become: yes
+  gather_facts: False
+  tasks:
+   - name: Install python 2 on Xenial
+     raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal python-libvirt python-lxml)
+
+- hosts: firewall-hypervisors
+  become: yes
+  gather_facts: true
+  pre_tasks:
+    - apt:
+        update_cache: yes
+  vars:
+    ethernet_to_rename: {}
+  roles:
+    - firewall-hypervisor

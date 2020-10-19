@@ -1,0 +1,36 @@
+vlans:
+  - vid: 1001
+    trunk: lan
+    description: "VLAN 1001 LAB - INTERNET ()"
+    network: "192.168.123.1/24"
+    nat: false
+    firewall: false
+    dns-forward: false
+    dhcp: []
+
+  - vid: 20
+    trunk: lan
+    description: "VLAN 20 - DEVELOPER CLOUD"
+    network: "10.20.0.0/16"
+    nat: true
+    firewall: true
+    dns-forward: true
+    dhcp: []
+
+  - vid: 30
+    trunk: lan
+    network: "10.30.0.0/16"
+    description: "VLAN 30 - CEPH"
+    nat: true
+    firewall: true
+    dns-forward: true
+    dhcp: []
+
+  - vid: 40
+    trunk: lan
+    network: "10.40.0.0/16"
+    description: "VLAN 40 - HPC"
+    nat: true
+    firewall: true
+    dns-forward: true
+    dhcp: []

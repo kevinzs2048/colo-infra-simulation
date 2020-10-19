@@ -1,0 +1,13 @@
+{% for vlan in vlans | rejectattr('dhcp', 'equalto', []) | list %}
+{% for dhcp in vlan.dhcp %}
+set service dhcp-server shared-network-name {{dhcp.name}} description '{{dhcp.description}}'
+set service dhcp-server shared-network-name {{dhcp.name}} subnet {{dhcp.subnet}} default-router '{{dhcp.router}}'
+set service dhcp-server shared-network-name {{dhcp.name}} subnet {{dhcp.subnet}} dns-server '{{dhcp.dns_server}}'
+set service dhcp-server shared-network-name {{dhcp.name}} subnet {{dhcp.subnet}} lease '{{dhcp.lease}}'
+set service dhcp-server shared-network-name {{dhcp.name}} subnet {{dhcp.subnet}} start '{{dhcp.range_start}}' stop '{{dhcp.range_stop}}'
+{% for static in dhcp.static %}
+set service dhcp-server shared-network-name {{dhcp.name}} subnet {{dhcp.subnet}} static-mapping '{{static.name}}' ip-address '{{static.ipv4_addr}}'
+set service dhcp-server shared-network-name {{dhcp.name}} subnet {{dhcp.subnet}} static-mapping '{{static.name}}' mac-address '{{static.mac_addr}}'
+{% endfor %}
+{% endfor %}
+{% endfor %}

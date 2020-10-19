@@ -1,0 +1,24 @@
+ethernet_trunks:
+  lan:
+    members:
+      - lan0
+      - lan1
+  wan:
+    members:
+      - wan0
+      - wan1
+
+packages:
+  - libvirt-bin
+  - qemu-kvm
+  - bridge-utils
+  - vlan
+
+modules:
+  - 8021q
+  - bridge
+  - bonding
+
+vyos_vm_disk_size: "20G"
+vyos_vm_cpus: "2"
+vyos_vm_memory: "4096"
