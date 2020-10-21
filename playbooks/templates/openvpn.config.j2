@@ -16,6 +16,6 @@ dev tun0
 </key>
 {% for vpn in vpns %}
 {% if certs.results[item|int].item['vlan'] in vpn.domain %}
-remote 213.146.143.36 {{vpn.port}}
+remote 192.68.122.78 {{vpn.port}}
 {% endif %}
 {% endfor %}

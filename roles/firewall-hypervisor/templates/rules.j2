@@ -1,0 +1,4 @@
+{% for index, interface in ethernet_to_rename.items() %}
+SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="{{interface.macaddress}}", NAME="{{interface.new}}"
+SUBSYSTEM=="net", ACTION=="change", DRIVERS=="?*" ATTR{address}=="{{interface.macaddress}}", NAME="{{interface.new}}"
+{% endfor %}

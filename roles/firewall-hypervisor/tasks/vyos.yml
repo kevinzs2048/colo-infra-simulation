@@ -1,12 +1,12 @@
 - name: Check if vyos ISO already exists
   stat:
-    path: /home/ubuntu/vyos-{{vyos_version}}-amd64.iso
+    path: /home/kevin/vyos-rolling-latest.iso
   register: iso
 
 - name: Download VyOS ISO if it doesnt exists
   get_url:
     url: https://downloads.vyos.io/release/{{vyos_version}}/vyos-{{vyos_version}}-amd64.iso
-    dest: /home/ubuntu/
+    dest: /home/kevin/
   when: iso.stat.exists == False
 
 - name: Check if vyos vm disk exists

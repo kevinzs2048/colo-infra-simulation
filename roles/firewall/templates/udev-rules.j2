@@ -1,0 +1,6 @@
+{% for interface in domiflist.stdout_lines %}
+{% set attrs = interface.split(" ") %}
+{% if attrs[0] != "" and attrs[1] != "" %}
+SUBSYSTEM=="net", DRIVERS=="?*", ATTR{address}=="{{attrs[1]}}", NAME="{{attrs[0]}}"
+{% endif %}
+{% endfor %}

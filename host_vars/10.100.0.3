@@ -1,0 +1,68 @@
+#secondary firewall
+
+vrrp:
+  1000:
+    group: 1
+    vip: "213.146.143.36/29"
+    local: "192.168.100.100/24"
+    priority: 100
+  1001:
+    group: 2
+    vip: "213.146.141.1/25"
+    local: "213.146.141.3/25"
+    priority: 100
+  101:
+    group: 101
+    vip: "10.101.0.1/16"
+    local: "10.101.0.3/16"
+    priority: 100
+  200:
+    group: 200
+    vip: "172.27.64.254/20"
+    local: "172.27.64.252/20"
+    priority: 100
+  300:
+    group: 230
+    vip: "172.27.80.254/20"
+    local: "172.27.80.252/20"
+    priority: 100
+  20:
+    group: 20
+    vip: "10.20.0.1/16"
+    local: "10.20.0.3/16"
+    priority: 100
+  21:
+    group: 21
+    vip: "10.21.0.1/16"
+    local: "10.21.0.3/16"
+    priority: 100
+  22:
+    group: 22
+    vip: "10.22.0.1/16"
+    local: "10.22.0.3/16"
+    priority: 100
+  30:
+    group: 30
+    vip: "10.30.0.1/16"
+    local: "10.30.0.3/16"
+    priority: 100
+  31:
+    group: 31
+    vip: "10.31.0.1/16"
+    local: "10.31.0.3/16"
+    priority: 100
+  40:
+    group: 40
+    vip: "10.40.0.1/16"
+    local: "10.40.0.3/16"
+    priority: 100
+  41:
+    group: 41
+    vip: "10.41.0.1/16"
+    local: "10.41.0.3/16"
+    priority: 100
+  100:
+    group: 100
+    vip: "10.100.0.1/16"
+    local: "10.100.0.3/16"
+    priority: 100

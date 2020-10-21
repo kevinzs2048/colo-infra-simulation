@@ -1,2 +1,6 @@
 [firewall-hypervisors]
-192.168.122.124 ansible_ssh_user=kevin ansible_ssh_pass=linaro ansible_sudo_pass=linaro
+192.168.100.160 ansible_ssh_user=root ansible_ssh_pass=linaro ansible_sudo_pass=linaro
+
+[firewalls]
+10.100.0.2 ansible_ssh_user=vyos ansible_ssh_pass=rrmMWHwn2b2kN9qQ ansible_connection=local
+

@@ -1,0 +1,28 @@
+# primary firewall
+
+vrrp:
+  1000:
+    group: 1
+    vip: "213.146.143.36/29"
+    local: "192.168.100.10/24"
+    priority: 200
+  1001:
+    group: 2
+    vip: "213.146.141.1/25"
+    local: "213.146.141.2/25"
+    priority: 200
+  101:
+    group: 101
+    vip: "10.101.0.1/16"
+    local: "10.101.0.2/16"
+    priority: 200
+  20:
+    group: 20
+    vip: "10.20.0.1/16"
+    local: "10.20.0.2/16"
+    priority: 200
+  30:
+    group: 30
+    vip: "10.30.0.1/16"
+    local: "10.30.0.2/16"
+    priority: 200

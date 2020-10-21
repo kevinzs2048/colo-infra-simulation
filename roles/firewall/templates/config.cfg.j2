@@ -67,7 +67,7 @@ set firewall name OUTSIDE_IN_RS rule 10 action 'accept'
 set firewall name OUTSIDE_IN_RS rule 10 state established 'enable'
 set firewall name OUTSIDE_IN_RS rule 10 state related 'enable'
 set firewall name OUTSIDE_IN_RS rule 20 action 'accept'
-set firewall name OUTSIDE_IN_RS rule 20 destination address '213.146.141.0/25'
+#set firewall name OUTSIDE_IN_RS rule 20 destination address '192.168.144.208/29'
 set firewall name OUTSIDE_IN_RS rule 20 protocol 'all'
 set firewall name OUTSIDE_IN_RS rule 20 source address '0.0.0.0/0'
 set firewall name OUTSIDE_LOCAL_RS default-action 'drop'
@@ -83,6 +83,10 @@ set firewall name OUTSIDE_LOCAL_RS rule 30 protocol 'tcp'
 set firewall name OUTSIDE_LOCAL_RS rule 30 recent count '4'
 set firewall name OUTSIDE_LOCAL_RS rule 30 recent time '60'
 set firewall name OUTSIDE_LOCAL_RS rule 30 state new 'enable'
+set firewall name OUTSIDE_LOCAL_RS rule 31 action 'accept'
+set firewall name OUTSIDE_LOCAL_RS rule 31 destination port '22'
+set firewall name OUTSIDE_LOCAL_RS rule 31 protocol 'tcp'
+set firewall name OUTSIDE_LOCAL_RS rule 31 state new 'enable'
 
 {% for vpn in vpns %}
 set firewall name OUTSIDE_LOCAL_RS rule 4{{vpn.tun}} action 'accept'
@@ -93,4 +97,4 @@ set firewall name OUTSIDE_LOCAL_RS rule 4{{vpn.tun}} protocol 'udp'
 set interfaces ethernet {{ethernet_vlan_mapping['1000']}} firewall in name 'OUTSIDE_IN_RS'
 set interfaces ethernet {{ethernet_vlan_mapping['1000']}} firewall local name 'OUTSIDE_LOCAL_RS'
 
-set protocols static route 0.0.0.0/0 next-hop 213.146.143.33
+set protocols static route 0.0.0.0/0 next-hop 192.168.122.78

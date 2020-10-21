@@ -20,6 +20,51 @@
   with_items:
     - "{{modules}}"
 
+- name: Identify the current ethernet interfaces
+  set_fact:
+    ethernet_interfaces: "{{ ansible_interfaces | difference(['lo']) | map('regex_replace', '^(.*)$', 'ansible_\\1' ) |  map('regex_replace', '[-]+', '_') | map('extract', hostvars[inventory_hostname]) | list }}"
+
+- name: Filter out ethernet interfaces to rename
+  set_fact:
+    ethernet_to_rename: "{{ ethernet_to_rename | combine({ item.device: ethernet_rename | selectattr('old', 'equalto', item.device) | first | combine({'macaddress': item.macaddress})}) }}"
+  with_items:
+    - "{{ethernet_interfaces}}"
+  when:
+     - item.device in ethernet_rename| map(attribute='old') | list
+
+- name: Generate udev rules for changing interfaces names
+  template:
+    src: rules.j2
+    dest: /etc/udev/rules.d/70-persistent-net.rules
+  when: (ethernet_to_rename is defined and ethernet_to_rename | length > 0)
+
+- name: Find existing networking config
+  find:
+    paths: "/etc/network/interfaces.d"
+    pattern: "*.cfg"
+  register: current_config
+
+- name: Remove existing network config
+  file:
+    path: "{{item.path}}"
+    state: absent
+  with_items:
+    - "{{current_config.files}}"
+
+- name: Generate the networking configuration
+  template:
+    src: interfaces.cfg.j2
+    dest: /etc/network/interfaces.d/network.cfg
+
+- name: Restart udev
+  shell: systemctl restart udev
+
+- name: Reload udev rules per interface
+  ignore_errors: yes
+  shell:  "ifconfig {{item['old']}} down; udevadm control --reload-rules; udevadm control --reload; udevadm trigger --action=add; udevadm trigger --action=change; udevadm trigger; ifup {{item['new']}}; ifconfig {{item['new']}} up"
+  with_items:
+    - "{{ethernet_to_rename.values()}}"
+
 - name: Create all required VLAN interfaces
   ignore_errors: yes
   shell: "vconfig add {{item.trunk}}-trunk {{item.vid}}"
@@ -97,4 +142,4 @@
   with_items:
     - "{{vlans}}"
 
-#- import_tasks: vyos.yml
+- import_tasks: vyos.yml
