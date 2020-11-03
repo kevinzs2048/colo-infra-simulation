@@ -1,7 +1,7 @@
 external-deps:
 	ansible-galaxy install --force -r install_roles.yml
 firewall-hypervisors:
-	ansible-playbook -K -vvv playbooks/deploy-firewall-hypervisor.yml -i ./hosts
+	ansible-playbook -vvv -b playbooks/deploy-firewall-hypervisor.yml -i ./hosts
 firewall:
 	ansible-playbook -K -vvvv playbooks/deploy-firewall.yml -i ./hosts
 backup:

@@ -30,8 +30,8 @@ vpns:
 vlans:
   - vid: 1000
     trunk: wan
-    description: "VLAN 1000 LAB - INTERNET"
-    network: "213.146.143.36/29"
+    description: "VLAN 1000 LAB - INTERNET OUTPUT"
+    network: "192.168.200.0/29"
     nat: false
     firewall: false
     dns-forward: false
@@ -39,8 +39,8 @@ vlans:
 
   - vid: 1001
     trunk: lan
-    description: "VLAN 1001 LAB - INTERNET ()"
-    network: "213.146.141.0/25"
+    description: "VLAN 1001 LAB - INTERNET CONNECT INTERNAL"
+    network: "192.168.200.64/25"
     nat: false
     firewall: false
     dns-forward: false
@@ -50,6 +50,15 @@ vlans:
     trunk: lan
     description: "VLAN 101 - MLAB"
     network: "10.101.0.0/16"
+    nat: true
+    firewall: true
+    dns-forward: true
+    dhcp: []
+
+  - vid: 100
+    trunk: lan
+    description: "VLAN 100 - MAMT"
+    network: "10.100.0.0/16"
     nat: true
     firewall: true
     dns-forward: true
