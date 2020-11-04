@@ -19,6 +19,7 @@ modules:
   - bridge
   - bonding
 
+vyos_version: "1.1.8"
 vyos_vm_disk_size: "20G"
 vyos_vm_cpus: "2"
 vyos_vm_memory: "4096"

@@ -1,6 +1,6 @@
 - name: Check if vyos ISO already exists
   stat:
-    path: /home/kevin/vyos-rolling-latest.iso
+    path: /home/kevin/vyos-{{vyos_version}}-amd64.iso
   register: iso
 
 - name: Download VyOS ISO if it doesnt exists
