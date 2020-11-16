@@ -5,7 +5,7 @@
 
 - name: Download VyOS ISO if it doesnt exists
   get_url:
-    url: https://downloads.vyos.io/release/{{vyos_version}}/vyos-{{vyos_version}}-amd64.iso
+    url: https://downloads.vyos.io/release/legacy/{{vyos_version}}/vyos-{{vyos_version}}-amd64.iso
     dest: /home/kevin/
   when: iso.stat.exists == False
 
@@ -23,6 +23,11 @@
      name: firewall
      command: define
      xml: "{{ lookup('template', 'firewall.xml.j2') }}"
+
+- name: Define VyOS virtual machine
+  virt:
+     name: firewall
+     command: start
 
 - name: Define bridges interfaces
   set_fact:
