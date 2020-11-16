@@ -1,0 +1,16 @@
+{% for vpn in vpns %}
+set interfaces openvpn vtun{{vpn.tun}} encryption aes256
+set interfaces openvpn vtun{{vpn.tun}} hash sha512
+set interfaces openvpn vtun{{vpn.tun}} local-port {{vpn.port}}
+set interfaces openvpn vtun{{vpn.tun}} mode 'server'
+{% for network in vpn.networks %}
+set interfaces openvpn vtun{{vpn.tun}} server push-route '{{network}}'
+{% endfor %}
+set interfaces openvpn vtun{{vpn.tun}} server subnet '{{vpn.subnet}}'
+set interfaces openvpn vtun{{vpn.tun}} tls ca-cert-file '/config/auth/{{ca_domain}}.crt'
+set interfaces openvpn vtun{{vpn.tun}} tls cert-file '/config/auth/{{vpn.domain}}.crt'
+set interfaces openvpn vtun{{vpn.tun}} tls crl-file '/config/auth/{{ca_domain}}.crl.pem'
+set interfaces openvpn vtun{{vpn.tun}} tls dh-file '/config/auth/dh1024.pem'
+set interfaces openvpn vtun{{vpn.tun}} tls key-file '/config/auth/{{vpn.domain}}.key'
+{% endfor %}
+

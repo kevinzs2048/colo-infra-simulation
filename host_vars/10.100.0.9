@@ -1,0 +1,26 @@
+ethernet_rename:
+  - new: wan0
+    old: ens9
+  - new: wan1
+    old: ens10
+  - new: lan0
+    old: ens11
+  - new: lan1
+    old: ens12
+ethernet_config:
+  lo:
+    bootproto: loopback
+    params:
+      dns-nameservers: 114.114.114.114, 114.114.115.115
+      dns-search: maas
+  ens10:
+    bootproto: static
+    params:
+      address: 10.100.0.9
+      netmask: 255.255.0.0
+      gateway: 10.100.0.1
+      mtu: 1500
+  ens3:
+    bootproto: dhcp
+    params:
+      mtu: 1500
