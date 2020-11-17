@@ -18,16 +18,24 @@
   shell: "qemu-img create -f qcow2 /var/lib/libvirt/images/vyos.qcow2 {{vyos_vm_disk_size}}"
   when: vyos_disk is defined and vyos_disk.stat.exists == False
 
+- name: Check vyos virtual machine is alive
+  virt:
+    command: list_vms
+    state: running
+  register: running_vms
+
 - name: Define VyOS virtual machine
   virt:
      name: firewall
      command: define
      xml: "{{ lookup('template', 'firewall.xml.j2') }}"
+  when: "{{'firewall' in running_vms}}"
 
 - name: Define VyOS virtual machine
   virt:
      name: firewall
      command: start
+  when: "{{'firewall' in running_vms}}"
 
 - name: Define bridges interfaces
   set_fact:
@@ -74,6 +82,7 @@
 
 - name: Append VLAN interfaces to the firewall
   shell: "virsh domiflist firewall |  egrep -E '.*br-vlan{{item.vid}} .*' || virsh attach-interface --domain firewall --type network --source br-vlan{{item.vid}} --model virtio --live --persistent"
+  ignore_errors: yes
   with_items:
     - "{{vlans}}"
 

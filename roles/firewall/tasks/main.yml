@@ -30,7 +30,7 @@
     commands:
       - "test -f /config/auth/dh1024.pem || openssl dhparam -outform PEM -out /config/auth/dh1024.pem 102"
       - "test -f /config/auth/{{ca_domain}}.crt || python /config/auth/2cca root cn={{ca_domain}} && sudo cp {{ca_domain}}.* /config/auth/"
-      
+
 - name: Generate certificates for each VPN server
   become: yes
   vyos_command:
@@ -52,13 +52,8 @@
     dest: "/tmp/config-{{inventory_hostname}}.cfg"
   delegate_to: localhost
 
-# - name: Load the configuration on the device
-#   vyos_config:
-#     src: "templates/config.cfg.j2"
-#     backup: yes
-#     save: yes
-
-- name: Set the default static route
-  vyos_command:
-    commands:
-      - "ip route add default via {{default_gateway_ip}} dev {{ethernet_vlan_mapping['1000']|string}}"
+- name: Load the configuration on the device
+  vyos_config:
+    src: "/tmp/config-{{inventory_hostname}}.cfg"
+    backup: yes
+    save: yes
