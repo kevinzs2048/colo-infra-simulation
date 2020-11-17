@@ -66,6 +66,7 @@ set firewall name OUTSIDE_IN_RS rule 10 action 'accept'
 set firewall name OUTSIDE_IN_RS rule 10 state established 'enable'
 set firewall name OUTSIDE_IN_RS rule 10 state related 'enable'
 set firewall name OUTSIDE_IN_RS rule 20 action 'accept'
+set firewall name OUTSIDE_IN_RS rule 20 destination address '192.168.200.64/26'
 set firewall name OUTSIDE_IN_RS rule 20 protocol 'all'
 set firewall name OUTSIDE_IN_RS rule 20 source address '0.0.0.0/0'
 set firewall name OUTSIDE_LOCAL_RS default-action 'drop'
@@ -89,4 +90,4 @@ set firewall name OUTSIDE_LOCAL_RS rule 31 state new 'enable'
 set interfaces ethernet {{ethernet_vlan_mapping['1000']}} firewall in name 'OUTSIDE_IN_RS'
 set interfaces ethernet {{ethernet_vlan_mapping['1000']}} firewall local name 'OUTSIDE_LOCAL_RS'
 
-set protocols static route 0.0.0.0/0 next-hop 192.168.200.3
+set protocols static route 0.0.0.0/0 next-hop 192.168.200.1
