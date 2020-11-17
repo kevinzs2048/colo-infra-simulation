@@ -16,8 +16,8 @@ set firewall all-ping enable
 set firewall syn-cookies enable
 set firewall group network-group INTERNAL_VLANS_WITH_INTERNET description "Internal VLANs with NAT"
 
-set service dns forwarding name-server 8.8.8.8
-set service dns forwarding name-server 4.4.4.4
+set service dns forwarding name-server 114.114.114.114
+set service dns forwarding name-server 114.114.115.115
 
 {% for vlan in vlans | selectattr('dns-forward', 'equalto', true) | list%}
 set service dns forwarding listen-on {{ethernet_vlan_mapping[vlan.vid|string]}}
@@ -60,14 +60,12 @@ set interfaces ethernet {{ethernet_vlan_mapping[vlan.vid|string]}} firewall loca
 {% endfor %}
 
 {% include './templates/dhcp.cfg.j2' %}
-{% include './templates/openvpn.cfg.j2' %}
 
 set firewall name OUTSIDE_IN_RS default-action 'drop'
 set firewall name OUTSIDE_IN_RS rule 10 action 'accept'
 set firewall name OUTSIDE_IN_RS rule 10 state established 'enable'
 set firewall name OUTSIDE_IN_RS rule 10 state related 'enable'
 set firewall name OUTSIDE_IN_RS rule 20 action 'accept'
-#set firewall name OUTSIDE_IN_RS rule 20 destination address '192.168.144.208/29'
 set firewall name OUTSIDE_IN_RS rule 20 protocol 'all'
 set firewall name OUTSIDE_IN_RS rule 20 source address '0.0.0.0/0'
 set firewall name OUTSIDE_LOCAL_RS default-action 'drop'
@@ -88,13 +86,7 @@ set firewall name OUTSIDE_LOCAL_RS rule 31 destination port '22'
 set firewall name OUTSIDE_LOCAL_RS rule 31 protocol 'tcp'
 set firewall name OUTSIDE_LOCAL_RS rule 31 state new 'enable'
 
-{% for vpn in vpns %}
-set firewall name OUTSIDE_LOCAL_RS rule 4{{vpn.tun}} action 'accept'
-set firewall name OUTSIDE_LOCAL_RS rule 4{{vpn.tun}} destination port '{{vpn.port}}'
-set firewall name OUTSIDE_LOCAL_RS rule 4{{vpn.tun}} protocol 'udp'
-{% endfor %}
-
 set interfaces ethernet {{ethernet_vlan_mapping['1000']}} firewall in name 'OUTSIDE_IN_RS'
 set interfaces ethernet {{ethernet_vlan_mapping['1000']}} firewall local name 'OUTSIDE_LOCAL_RS'
 
-set protocols static route 0.0.0.0/0 next-hop 192.168.122.78
+set protocols static route 0.0.0.0/0 next-hop 192.168.200.3

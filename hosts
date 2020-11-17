@@ -4,4 +4,5 @@
 
 [firewalls]
 10.100.0.2 ansible_ssh_user=vyos ansible_ssh_pass=vyos ansible_connection=local
+10.100.0.3 ansible_ssh_user=vyos ansible_ssh_pass=vyos ansible_connection=local
 

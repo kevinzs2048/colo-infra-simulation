@@ -40,7 +40,7 @@ vlans:
   - vid: 1001
     trunk: lan
     description: "VLAN 1001 LAB - INTERNET CONNECT INTERNAL"
-    network: "192.168.200.64/25"
+    network: "192.168.200.64/26"
     nat: false
     firewall: false
     dns-forward: false
