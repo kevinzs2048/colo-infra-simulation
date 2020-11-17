@@ -1,12 +1,15 @@
+# Note: please make sure that the interface name is
+# br-vlan-x, the generated item from libvirt is not this.
+# Need to manually modified.
 br-vlan1000 52:54:00:56:1d:f4
 br-vlan1001 52:54:00:e8:6d:3a
 br-vlan101 52:54:00:75:e4:8c
 br-vlan100 52:54:00:83:24:4e
 br-vlan30 52:54:00:0a:1b:44
 br-vlan20 52:54:00:86:3a:4d
-br-vlan-1000 52:54:00:9b:79:46
-br-vlan-1001 52:54:00:b2:14:f0
-br-vlan-101 52:54:00:72:78:9b
-br-vlan-100 52:54:00:b4:cc:26
-br-vlan-30 52:54:00:a5:6e:0b
-br-vlan-20 52:54:00:89:c2:f7
+br-vlan1000 52:54:00:9b:79:46
+br-vlan1001 52:54:00:b2:14:f0
+br-vlan101 52:54:00:72:78:9b
+br-vlan100 52:54:00:b4:cc:26
+br-vlan30 52:54:00:a5:6e:0b
+br-vlan20 52:54:00:89:c2:f7
